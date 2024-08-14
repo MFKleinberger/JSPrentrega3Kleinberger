@@ -46,12 +46,12 @@ function limpiarCarrito() {
 }
 
 function mostrarCarrito() {
-    let mensaje = '';
+    let mensaje = 'Felicitaciones!! \nYa tienes definido tus alimentos:\n\n';
     carrito.forEach(({ nombre, um, cantidad, carbos }) => {
-        mensaje += `Felicitaciones!! \nYa tienes definido tus alimentos:\n\n ${cantidad} x ${nombre} (${um}) : ${carbos * cantidad} gr\n`;
+        mensaje += `${cantidad} x ${nombre} (${um}) : ${carbos * cantidad} gr\n`;
     });
     const totalCarbos = carrito.reduce((acc, item) => acc + item.carbos * item.cantidad, 0);
-    mensaje += `\n\nTotal de Carbohidratos: ${totalCarbos} gr`;
+    mensaje += `\nTotal de Carbohidratos: ${totalCarbos} gr`;
     alert(mensaje || "El carrito está vacío.");
 }
 
