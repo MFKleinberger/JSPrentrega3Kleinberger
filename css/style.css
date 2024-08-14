@@ -1,0 +1,100 @@
+header {
+    background-color: #eaeef2;
+    padding: 5px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+header h2 {
+    margin: 0;
+    color: #4d5155;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+header p {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+
+#barra-carrito {
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: flex;
+    /* justify-content: space-between; */
+    align-items: last baseline;
+}
+
+#total-carbohidratos {
+    padding: 10px;
+    font-size: .8rem;
+    font-weight: bold;
+    color: #333;
+}
+
+#boton-limpiar, #boton-mostrar {
+    background-color: rgb(38, 38, 38);
+    color: #fff;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: .8rem;
+}
+
+#boton-limpiar {
+    margin-right: 10px;
+}
+
+#alimentos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    max-width: 300px;
+    margin: 10px;
+}
+
+.card-body {
+    display: flex;  
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.imgCard{
+    height: 5rem;
+    width: 15rem;
+    object-fit: cover;
+}
+
+.card-text {
+    margin-bottom: 10px;
+}
+
+.card-text.carbos {
+    margin-bottom: 5px;
+}
+
+.card-text.um {
+    margin-bottom: 0;
+}
+
+.control-group {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.cantidad-input {
+    width: 50px;
+    text-align: center;
+    font-family: monospace;
+}
