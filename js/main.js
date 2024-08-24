@@ -31,41 +31,73 @@ function actualizarCarrito(producto, cantidad) {
 
 function actualizarTotalCarbohidratos() {
     const totalCarbos = carrito.reduce((acc, item) => acc + item.carbos * item.cantidad, 0);
-    document.getElementById("total-carbohidratos").innerText = `Total Carbo/h: ${totalCarbos}`;
+    document.getElementById("total-carbohidratos").innerText = `Carbo/h: ${totalCarbos} gr`;
 }
 
 function limpiarCarrito() {
-    if (confirm("¿Estás seguro de que deseas limpiar el carrito?")) {
-        carrito = [];
-        localStorage.clear("carrito");
-        actualizarTotalCarbohidratos();
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'No, mantener',
+        reverseButtons: true,
+        customClass: {
+            title: 'swal2-title',
+            content: 'swal2-content',
+            confirmButton: 'swal2-styled',
+            cancelButton: 'swal2-styled'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            carrito = [];
+            localStorage.removeItem("carrito");
+            actualizarTotalCarbohidratos();
 
-        const inputs = [...document.getElementsByClassName('cantidad-input')];
-        inputs.forEach(input => input.value = 0);
-    }
+            const inputs = [...document.getElementsByClassName('cantidad-input')];
+            inputs.forEach(input => input.value = 0);
+
+            Swal.fire(
+                '¡Carrito limpio!',
+                'Tu carrito ha sido vaciado.',
+                'success'
+            );
+        }
+    });
 }
 
 function mostrarCarrito() {
-    let mensaje = 'Felicitaciones!! \nYa tienes definido tus alimentos:\n\n';
+    let mensaje = '';
     carrito.forEach(({ nombre, um, cantidad, carbos }) => {
-        mensaje += `${cantidad} x ${nombre} (${um}) : ${carbos * cantidad} gr\n`;
+        mensaje += `${cantidad} x ${nombre} (${um}) : ${carbos * cantidad} gr<br>`;
     });
     const totalCarbos = carrito.reduce((acc, item) => acc + item.carbos * item.cantidad, 0);
-    mensaje += `\nTotal de Carbohidratos: ${totalCarbos} gr`;
-    alert(mensaje || "El carrito está vacío.");
+    mensaje += `<br><strong>Total de Carbohidratos: ${totalCarbos} gr<strong>`;
+
+    Swal.fire({
+        title: 'Carbohidratos para una hora de Trail-Running',
+        html: mensaje || "El carrito está vacío.",
+        icon: 'success',
+        confirmButtonText: 'OK',
+        customClass: {
+            popup: 'swal-carrito',
+            confirmButtonText: 'swal2-styled'
+        }
+    });
 }
 
-const header = document.getElementById("mi-header");
-const titulo = document.createElement("h1");
-const subTitulo = document.createElement("h2")
-titulo.innerText = "Trail Running";
-subTitulo.innerText = "Calculadora de Carbohidratos";
-header.appendChild(titulo);
-header.appendChild(subTitulo);
+function cargarCantidadesDesdeLocalStorage() {
+    const carritoGuardado = JSON.parse(localStorage.getItem('carrito')) || [];
 
-const parrafo = document.createElement("p");
-parrafo.innerText = "Para cada hora de carrera se estima una necesidad de reposición de 70 a 90 gramos de carbohidratos.";
-header.appendChild(parrafo);
+    carritoGuardado.forEach(item => {
+        const inputCantidad = document.getElementById(`cantidad-${item.id}`);
+        
+        if (inputCantidad) {
+            inputCantidad.value = item.cantidad;
+        }
+    });
+}
 
 function crearBarraCarrito() {
     const containerCarrito = document.getElementById("container-carrito");
@@ -75,26 +107,25 @@ function crearBarraCarrito() {
 
     const totalCarbohidratos = document.createElement("span");
     totalCarbohidratos.id = "total-carbohidratos";
-    totalCarbohidratos.innerText = "Total Carbo/h: 0";
+    const totalCarbosGuardado = carrito.reduce((acc, item) => acc + item.carbos * item.cantidad, 0);
+    totalCarbohidratos.innerText = `Carbo/h: ${totalCarbosGuardado} gr`;    
 
     const botonLimpiar = document.createElement("button");
     botonLimpiar.id = "boton-limpiar";
-    botonLimpiar.innerText = "Limpiar Carrito";
+    botonLimpiar.innerText = "Limpiar carbs";
     botonLimpiar.onclick = limpiarCarrito;
 
     const botonMostrar = document.createElement("button");
     botonMostrar.id = "boton-mostrar";
-    botonMostrar.innerText = "Mostrar Carrito";
+    botonMostrar.innerText = "Resumen carbs";
     botonMostrar.onclick = mostrarCarrito;
 
     barra.append(totalCarbohidratos);
-    barra.append(botonLimpiar);
     barra.append(botonMostrar);
+    barra.append(botonLimpiar);
 
-    containerCarrito.appendChild(barra);
+    containerCarrito.append(barra);
 }
-
-crearBarraCarrito();
 
 function crearCard(producto) {
     const card = document.createElement("div");
@@ -131,11 +162,17 @@ function crearCard(producto) {
     cantidad.className = "form-control text-center cantidad-input";
     cantidad.type = "text";
     cantidad.value = 0;
+    cantidad.id = `cantidad-${producto.id}`;
 
     const botonMenos = document.createElement("button");
     botonMenos.className = "btn btn-danger ml-2";
     botonMenos.innerText = " - ";
     botonMenos.onclick = () => actualizarCantidad(cantidad, producto, false);
+
+    const cantidadGuardada = carrito.find(item => item.id === producto.id);
+    if (cantidadGuardada) {
+        cantidad.value = cantidadGuardada.cantidad;
+    }
 
     controlGroup.append(botonMenos);
     controlGroup.append(cantidad);
@@ -149,7 +186,58 @@ function crearCard(producto) {
 
     card.append(cardBody);
 
-    document.getElementById("alimentos-container").appendChild(card);
-}
+    document.getElementById("alimentosContainer").append(card);
+};
 
-alimentos.forEach(el => crearCard(el));
+const header = document.getElementById("mi-header");
+const titulo = document.createElement("h1");
+const subTitulo = document.createElement("h2")
+titulo.innerText = "Trail Running";
+subTitulo.innerText = "Calculadora de Carbohidratos";
+
+const parrafo = document.createElement("p");
+parrafo.innerText = "Para cada hora de carrera se estima una necesidad de reposición de 70 a 90 gramos de carbohidratos.";
+
+header.append(titulo);
+header.append(subTitulo);
+header.append(parrafo);
+
+crearBarraCarrito();
+
+const subirLink = document.createElement('a');
+subirLink.href = '#';
+subirLink.className = 'subir';
+
+const subirIcon = document.createElement('i');
+subirIcon.className = 'fa-solid fa-chevron-up';
+
+subirLink.append(subirIcon);
+
+document.body.append(subirLink);
+
+const whatsappLink = document.createElement('a');
+whatsappLink.href = 'https://walink.co/e7f175';
+whatsappLink.className = 'whatsapp';
+whatsappLink.target = '_blank';
+
+const whatsappIcon = document.createElement('i');
+whatsappIcon.className = 'fa-brands fa-whatsapp';
+
+whatsappLink.append(whatsappIcon);
+
+document.body.append(whatsappLink);
+
+
+
+
+fetch('../data.json')
+    .then(response =>response.json())
+    .then(alimentos => {
+        alimentosContainer.innerHTML = `<div class="loader"></div>`;
+
+        setTimeout(() => {
+            alimentosContainer.innerHTML = '';
+            alimentos.forEach(el => crearCard(el));
+        }, 2000);
+    });
+
